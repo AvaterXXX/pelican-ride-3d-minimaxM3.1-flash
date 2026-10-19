@@ -1,0 +1,10 @@
+# dependencies
+source/node_modules/
+
+# 构建中间产物
+source/dist/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+*.log

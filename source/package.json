@@ -1,0 +1,19 @@
+{
+  "name": "pelican-road-king",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "PELICAN: THE ROAD KING - a cinematic 3D web experience: a pelican rides a bicycle, then takes over a sports car.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5178",
+    "build": "vite build && node tools/inline.mjs",
+    "build:multi": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 5179"
+  },
+  "dependencies": {
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
+  }
+}

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>PELICAN · THE ROAD KING — 鹈鹕骑自行车与飙车</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+<div id="app">
+  <canvas id="scene"></canvas>
+
+  <!-- 电影遮幅 2.39:1 -->
+  <div class="bar bar-top" id="barTop"></div>
+  <div class="bar bar-bot" id="barBot"></div>
+  <div class="vignette"></div>
+  <div class="grain" id="grainLayer"></div>
+  <div class="anamorphic" id="flareLayer"></div>
+
+  <!-- 片头标题卡 -->
+  <header class="titlecard" id="titleCard">
+    <div class="tc-sub">A MINIMAX PICTURES PRODUCTION</div>
+    <h1 class="tc-main">PELICAN</h1>
+    <div class="tc-line"></div>
+    <h2 class="tc-sub2">THE ROAD KING</h2>
+    <div class="tc-credits">
+      <span>一只鹈鹕</span><i>·</i><span>一辆自行车</span><i>·</i><span>一场公路传奇</span>
+    </div>
+  </header>
+
+  <!-- 顶部状态条 -->
+  <div class="topbar">
+    <div class="chip" id="chipMode"><span class="dot"></span><b>自行车</b></div>
+    <div class="chip" id="chipScene"><b>黄金海岸</b></div>
+    <div class="chip" id="chipCam"><b>电影跟拍</b></div>
+    <div class="chip" id="chipFps"><b>--</b> FPS</div>
+  </div>
+
+  <!-- 仪表盘 -->
+  <section class="hud" id="hud">
+    <canvas class="speedo" id="speedo" width="320" height="320"></canvas>
+    <div class="hud-side">
+      <div class="hud-val"><label>速度</label><span id="valSpeed">0</span><i>km/h</i></div>
+      <div class="hud-val"><label>挡位</label><span id="valGear">N</span></div>
+      <div class="hud-val"><label>踏频</label><span id="valRpm">0</span><i>rpm</i></div>
+    </div>
+  </section>
+
+  <!-- 字幕 -->
+  <div class="subtitle" id="subtitle"><span></span></div>
+
+  <!-- 底部主操作栏 -->
+  <nav class="dock" id="dock">
+    <button class="primary" id="btnRide">
+      <span class="pk">开始</span>
+      <span class="p1">骑车出发</span>
+      <span class="p2">RIDE &amp; DRIVE</span>
+    </button>
+    <div class="dock-group">
+      <button class="dock-btn" id="btnScene"><span>场景</span><i>SCENE</i></button>
+      <button class="dock-btn" id="btnCam"><span>视角</span><i>CAMERA</i></button>
+      <button class="dock-btn" id="btnAuto"><span>自动驾驶</span><i>AUTO</i></button>
+      <button class="dock-btn" id="btnHorn"><span>喇叭</span><i>HORN</i></button>
+      <button class="dock-btn" id="btnSwap"><span>换回单车</span><i>SWAP</i></button>
+    </div>
+  </nav>
+
+  <!-- 控制面板 -->
+  <aside class="panel" id="panel">
+    <div class="panel-head">
+      <h3>导演控制台 <i>DIRECTOR'S CONSOLE</i></h3>
+      <button class="collapse" id="btnCollapse" title="折叠">−</button>
+    </div>
+    <div class="panel-body" id="panelBody">
+
+      <div class="group">
+        <h4>场景世界 <i>WORLD</i></h4>
+        <div class="seg" id="segScene">
+          <button data-scene="coast">黄金海岸</button>
+          <button data-scene="neon">霓虹雨夜</button>
+          <button data-scene="storm">雷暴荒野</button>
+          <button data-scene="desert">沙漠黄昏</button>
+        </div>
+        <label class="row"><span>时间</span><input type="range" id="rngTime" min="0" max="100" value="16" /><em id="lblTime">黄昏</em></label>
+        <label class="row"><span>雾浓度</span><input type="range" id="rngFog" min="0" max="100" value="35" /><em id="lblFog">35</em></label>
+        <label class="row"><span>颗粒</span><input type="range" id="rngGrain" min="0" max="100" value="45" /><em id="lblGrain">45</em></label>
+        <label class="row"><span>辉光</span><input type="range" id="rngBloom" min="0" max="100" value="55" /><em id="lblBloom">55</em></label>
+      </div>
+
+      <div class="group">
+        <h4>自行车动作 <i>BICYCLE</i></h4>
+        <div class="seg wrap" id="segAction">
+          <button data-act="coast">巡航</button>
+          <button data-act="sprint">冲刺</button>
+          <button data-act="climb">爬坡</button>
+          <button data-act="jump">跳台腾空</button>
+          <button data-act="wheelie">翘头</button>
+          <button data-act="flip">后空翻</button>
+          <button data-act="weave">蛇行</button>
+          <button data-act="brake">急刹</button>
+          <button data-act="idle">静止</button>
+        </div>
+        <label class="row"><span>车速</span><input type="range" id="rngSpeed" min="0" max="100" value="45" /><em id="lblSpeed">45</em></label>
+        <label class="row"><span>倾角</span><input type="range" id="rngLean" min="0" max="100" value="25" /><em id="lblLean">25</em></label>
+      </div>
+
+      <div class="group">
+        <h4>驾驶 <i>DRIVING</i></h4>
+        <div class="seg" id="segDrive">
+          <button data-drive="auto">自动驾驶</button>
+          <button data-drive="manual">人工接管</button>
+        </div>
+        <label class="row"><span>油门</span><input type="range" id="rngThrottle" min="0" max="100" value="55" /><em id="lblThrottle">55</em></label>
+        <label class="row"><span>灵敏度</span><input type="range" id="rngSteer" min="20" max="100" value="65" /><em id="lblSteer">65</em></label>
+        <div class="checks">
+          <label class="chk"><input type="checkbox" id="chkLights" checked /><span>车灯</span></label>
+          <label class="chk"><input type="checkbox" id="chkAuto" /><span>自动驾驶</span></label>
+          <label class="chk"><input type="checkbox" id="chkSlow" /><span>慢动作</span></label>
+          <label class="chk"><input type="checkbox" id="chkShake" checked /><span>手持震动</span></label>
+          <label class="chk"><input type="checkbox" id="chkAudio" checked /><span>音效</span></label>
+          <label class="chk"><input type="checkbox" id="chkHud" checked /><span>仪表</span></label>
+        </div>
+      </div>
+
+      <div class="group">
+        <h4>镜头 <i>CAMERA</i></h4>
+        <div class="seg wrap" id="segCamBike">
+          <button data-cam="cine">电影跟拍</button>
+          <button data-cam="orbit">环绕</button>
+          <button data-cam="fpov">骑手视角</button>
+          <button data-cam="low">低机位</button>
+          <button data-cam="drone">航拍</button>
+          <button data-cam="free">自由</button>
+        </div>
+        <div class="seg wrap" id="segCamCar">
+          <button data-cam="cockpit">车内副驾</button>
+          <button data-cam="driver">驾驶员视角</button>
+          <button data-cam="chase">车外跟拍</button>
+          <button data-cam="carcine">车外电影</button>
+          <button data-cam="hood">引擎盖</button>
+          <button data-cam="wheel">车轮</button>
+          <button data-cam="drone">航拍</button>
+          <button data-cam="free">自由</button>
+        </div>
+        <label class="row"><span>焦距</span><input type="range" id="rngFov" min="20" max="100" value="55" /><em id="lblFov">55</em></label>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- 快捷键提示 -->
+  <div class="hints" id="hints">
+    <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 驾驶</span>
+    <span><kbd>Space</kbd> 手刹漂移</span>
+    <span><kbd>C</kbd> 切镜头</span>
+    <span><kbd>V</kbd> 自动/手动</span>
+    <span><kbd>L</kbd> 车灯</span>
+    <span><kbd>H</kbd> 喇叭</span>
+    <span><kbd>拖拽</kbd> 转视角</span>
+  </div>
+
+  <!-- 加载 -->
+  <div class="loader" id="loader">
+    <div class="lspin"></div>
+    <div class="ltext" id="loaderText">正在构建世界…</div>
+  </div>
+
+  <!-- 开始闸门 -->
+  <div class="gate" id="gate">
+    <div class="gate-inner">
+      <div class="gate-kicker">A MINIMAX PICTURES PRODUCTION</div>
+      <h1>PELICAN<em>:</em> THE ROAD KING</h1>
+      <p>鹈鹕的公路传奇 · 3D 电影级互动体验</p>
+      <button id="btnStart" disabled>正在载入…</button>
+      <div class="gate-load"><div class="gate-bar" id="gateBar"></div></div>
+    </div>
+  </div>
+
+  <!-- 运行时错误显示（避免黑屏无提示） -->
+  <pre id="errbox"></pre>
+  <div id="dbg" style="position:fixed;left:8px;bottom:8px;z-index:998;font:11px/1.4 ui-monospace,monospace;color:#7fff9f;background:rgba(0,0,0,.55);padding:5px 8px;display:none;white-space:pre"></div>
+  <script>
+    (function () {
+      var box = document.getElementById('errbox');
+      function show(tag, t) {
+        box.style.display = 'block';
+        box.textContent += '[' + tag + '] ' + t + '\n';
+        console.error(tag, t);
+      }
+      window.addEventListener('error', function (e) {
+        show('ERROR', (e.error && e.error.stack) || e.message || String(e));
+      });
+      window.addEventListener('unhandledrejection', function (e) {
+        var r = e.reason;
+        show('REJECT', (r && r.stack) || String(r));
+      });
+      // 引擎尚未就绪时的点击也要被记住，避免“点了没反应”
+      window.__startRequested = false;
+      document.addEventListener('click', function (e) {
+        var t = e.target;
+        while (t && t !== document.body) {
+          if (t.id === 'btnStart') {
+            window.__startRequested = true;
+            if (window.__game && window.__game.start) { try { window.__game.start(); } catch (err) {} }
+            break;
+          }
+          t = t.parentNode;
+        }
+      }, true);
+    })();
+  </script>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
